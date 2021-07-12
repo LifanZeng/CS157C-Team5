@@ -1,0 +1,74 @@
+CREATE KEYSPACE booking_system WITH replication = {‘class’: ‘SimpleStrategy’, ‘replication_factor’: 1};
+
+
+CREATE TYPE unit_date(
+		CampgroundID text;
+	Camping-unitID text;
+	Date date;
+);
+
+
+CREATE TYPE unit_visitor(
+		Camping-unitID text;
+		VisitorID text;
+);
+
+
+CREATE TABLE booking_system.campgrounds (
+CampgroundID text PRIMARY KEY;
+Name text;
+Description text;
+);
+
+
+CREATE TABLE booking_system.Camping-units (
+		Camp-unitID text PRIMARY KEY;
+Unit-Number text;
+Description text;
+);
+
+CREATE TABLE booking_system. amenities_by_camping-unit (
+		CamgroundID text;
+	Camping-unitID text;
+	Amenities text;
+	PRIMARY KEY (CamgroundID, Camping-unitID);
+);
+
+
+CREATE TABLE booking_system. available_campingUnit_by_campground_date (
+		BookedUnit unit_date PRIMARY KEY;
+	Is-Available  boolean;
+);
+
+
+CREATE TABLE booking_system. reservation_by_confirmation (
+		ConfirmationNumber text PRIMARY KEY;
+VisitorID text;
+BookedUnit unit_date;
+);
+
+
+CREATE TABLE booking_system. reservation_by_visitorname (
+		Visitor-Lastname text;    
+VisitorID text;    
+BookedUnit set <unit_date>;
+PRIMARY KEY (Visitor-Lastname, VisitorID);
+);
+
+
+CREATE TABLE booking_system. reservation_by_campground_date (
+		CamgroundID  text;       
+	Date  date;        
+	BookedUnits list<unit-visitor>;  
+	PRIMARY KEY (CamgroundID, Date);
+);
+
+
+--------------------------The transaction of create a reservation--------------------------------------------------------------------------------
+
+cqlsh> BEGIN BATCH
+INSERT INTO booking_system. reservation_by_confirmation (ConfirmationNumber, VisitorID, BookedUnit) VALUES (....);
+INSERT INTO booking_system. reservation_by_visitorname (Visitor-Lastname, VisitorID text, BookedUnit set <unit_date>)  VALUES (....);
+INSERT INTO booking_system. Reservation_by_campground_date (CamgroundID, Date, BookedUnits list<unit-visitor>) VALUES (....);
+UPDATE booking_system. available_campingUnit_by_campground_date SET Is-Available=false WHERE BookedUnit = (..., …, ...);
+cqlsh>APPLY BATCH;
